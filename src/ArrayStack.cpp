@@ -2,8 +2,9 @@
 
 #include <iostream>
 
-#include "Bigram.h"
 #include "Globals.h"
+
+#include "Bigram.h"
 
 int ArrayStack::push(const Bigram& bigram)
 {
