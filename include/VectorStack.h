@@ -18,7 +18,7 @@ public:
 
 private:
   std::vector<Bigram> stack;
-  Bigram* top = nullptr;
+  Bigram* top;
 };
 
 #endif // VECTORSTACK_H
