@@ -25,6 +25,7 @@ private:
   Bigram* end;
   Bigram* front;
   Bigram* back;
+  int size = 0;
 };
 
 #endif // RINGBUFFERQUEUE_H

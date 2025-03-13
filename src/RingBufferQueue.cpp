@@ -10,6 +10,15 @@ RingBufferQueue::RingBufferQueue()
 {
   // Preallocate underlying array
   queue.reserve(MAX);
+
+  // Fill elements
+  for (int i = 0; i != queue.capacity(); ++i)
+  {
+    const Bigram fill;
+    queue.push_back(fill);
+  }
+
+  // Initialize pointers
   begin = &queue[0];
   end = begin + queue.capacity() - 1;
   front = begin;
@@ -18,18 +27,17 @@ RingBufferQueue::RingBufferQueue()
 
 int RingBufferQueue::push(const Bigram& bigram)
 {
-  // Reallocate underlying array if necessary - add 1 to size for empty pop slot
-  if ((queue.size() + 1) % MAX == 0)
+  // Reallocate underlying array if necessary
+  if (size % MAX == 0 && size != 0)
     expand();
 
-  // Add 1 to back to skip empty pop slot
-  if (queue.size() == 0 || back + 1 == end)
+  if (size == 0 || back == end)
     back = begin;
   else
     ++back;
 
-  const int position = back - begin;
-  queue.emplace(queue.begin() + position, bigram);
+  *back = bigram;
+  ++size;
 
   std::cout << "bigram \"" << *back << "\" successfully pushed to back\n\n";
 
@@ -38,10 +46,8 @@ int RingBufferQueue::push(const Bigram& bigram)
 
 int RingBufferQueue::pop()
 {
-  // TODO! Push after pop on a non-empty vector is inserting in the wrong location
-
   // Underflow handling
-  if (queue.size() < 1)
+  if (size < 1)
   {
     std::cerr << "Popping would cause underflow\n\n";
     return FAIL;
@@ -50,14 +56,11 @@ int RingBufferQueue::pop()
   // Copy front for display purposes
   const auto copy = *front;
   
-  // Move front value to back and pop it
-  const int frontPosition = front - begin;
-  const int backPosition = back - begin;
-  queue[frontPosition] = std::move(backPosition);
-  queue.pop_back();
+  *front = '\0';
+  --size;
 
   // Move front
-  if (queue.size() == 0 || front + 1 == end)
+  if (size == 0 || front == end)
     front = begin;
   else
     ++front;
@@ -71,13 +74,13 @@ void RingBufferQueue::view()
 {
   std::cout << "\n";
 
-  if (queue.size() < 1)
+  if (size < 1)
     std::cerr << "Queue is empty\n";
 
   // Print the queue
   const int position = front - begin;
   auto current = front;
-  for (int i = 0; i != queue.size(); ++i)
+  for (int i = 0; i != size; ++i)
   {
     std::cout << i << ": " << *current << "\n";
     if (begin + position + 1 == end)
@@ -91,30 +94,43 @@ void RingBufferQueue::view()
 
 int RingBufferQueue::expand()
 {
+  if (queue.capacity() > size)
+    return SUCCESS;
+
   // Copy queue vector to move values to beginning
-  const auto copy = queue;
-  queue.clear();
-
-  // Copy values from copy to queue starting at index 0
-  const int position = front - begin;
-  auto current = front;
-  for (int i = 0; i != copy.size(); ++i)
-  {
-    queue.push_back(*current);
-    if (current + 1 == end)
-      current = begin;
-    else
-      ++current;
-  }
-
+  std::vector<Bigram> copy = queue;
+  const int frontPosition = front - begin;
+  const int endPosition = end - begin;
+  
   // Increase capacity
+  queue.clear();
   queue.reserve(queue.capacity() + MAX);
 
   // Reassign pointers to newly allocated array
   begin = &queue[0];
   end = begin + queue.capacity() - 1;
   front = begin;
-  back = begin + queue.size() - 1;
+  back = begin + size - 1;
+  size = 0;
+
+  // Fill elements
+  for (auto it = queue.begin(); it != queue.end(); ++it)
+  {
+    const Bigram fill;
+    queue.push_back(fill);
+  }
+
+  // Copy values from copy to queue starting at index 0
+  auto current = &copy[0] + frontPosition;
+  for (int i = 0; i != copy.size(); ++i)
+  {
+    queue[i] = *current;
+    ++size;
+    if (current == &copy[0] + endPosition)
+      current = &copy[0];
+    else
+      ++current;
+  }
 
   return SUCCESS;
 }
