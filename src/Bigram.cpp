@@ -1,5 +1,7 @@
 #include "Bigram.h"
 
+#include <string>
+
 Bigram::Bigram(const std::string& bigram)
 {
   this->first = bigram[0];
