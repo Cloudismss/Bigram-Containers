@@ -7,7 +7,7 @@
 class Bigram
 {
 public:
-  Bigram() { }
+  Bigram() { first = '\0', last = '\0'; }
   ~Bigram() { }
 
 public:
