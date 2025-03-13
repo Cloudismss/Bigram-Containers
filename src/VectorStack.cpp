@@ -10,6 +10,7 @@ VectorStack::VectorStack()
 {
   // Preallocate underlying array
   stack.reserve(MAX);
+  top = &stack[0];
 }
 
 int VectorStack::push(const Bigram& bigram)
