@@ -6,9 +6,15 @@
 
 #include "Bigram.h"
 
-int VectorStack::push(const Bigram& bigram)
+VectorStack::VectorStack()
 {
   // Preallocate underlying array
+  stack.reserve(MAX);
+}
+
+int VectorStack::push(const Bigram& bigram)
+{
+  // Reallocate underlying array if necessary
   if (stack.size() % MAX == 0)
     stack.reserve(stack.capacity() + MAX);
 

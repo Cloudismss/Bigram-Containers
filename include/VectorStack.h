@@ -9,6 +9,9 @@
 class VectorStack : public Deque
 {
 public:
+  VectorStack();
+
+public:
   int push(const Bigram& bigram) override;
   int pop() override;
   void view() override;
